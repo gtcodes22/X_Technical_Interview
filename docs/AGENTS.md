@@ -10,7 +10,8 @@ These come from the assessment brief and Kopano's own policies. Breaking one is 
 2. **Nothing personal before verification.** The registered mobile number and the last 4 digits of the ID must both match the same record. Enforce this in the data-access layer, not in a prompt.
 3. **Scope data access to the verified borrower.** Never let the model, or user input, choose which `loan_id` or `borrower_id` is read.
 4. **Three failed verification attempts means handover.** Count attempts server-side.
-5. **After handover the assistant stays silent.** No further automated replies in that conversation.
+5. **During handover the assistant stays silent.** In `HANDED_OVER` and `WITH_AGENT` there are no bot replies and no LLM calls. **Only an agent's "Return to assistant" resumes the bot.** Session timers pause during handover.
+   - **Messages are stored one key per message.** Never read-modify-write a whole conversation, because Blobs is last-write-wins.
 6. **Handover triggers follow `Knowledge_Base/customer-service-standards.docx`.** If in doubt, hand over.
 7. **Never promise outcomes that need approval:** penalty waivers, payment holidays, restructuring, top-ups.
 8. **Every policy answer cites its source document.** If nothing relevant is retrieved, say so. Don't guess.

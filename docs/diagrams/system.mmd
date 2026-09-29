@@ -32,10 +32,10 @@ flowchart TB
     BUILD["Build gate<br/>npm ci → typecheck → test → vite build<br/>atomic deploys · previews on PRs"]
     subgraph CDN["CDN — static pages"]
       CHAT["index.html<br/>customer chat"]
-      STAFFUI["staff.html<br/>queue · audit · dashboard · kill switch"]
+      STAFFUI["staff.html — Agent view<br/>queue · claim · reply · return<br/>audit · dashboard · kill switch"]
     end
     subgraph FN["Functions — TypeScript thin adapters"]
-      API["/api/chat · /api/conversation/:id<br/>/api/handovers · /api/audit<br/>/api/health · /api/metrics"]
+      API["/api/chat · /api/conversation/:id (poll)<br/>/api/handovers (+ claim · reply · return)<br/>/api/audit · /api/health · /api/metrics"]
       SCHED["Scheduled checker<br/>every 15 min"]
     end
     subgraph CORE["src/core — pure, tested logic"]
@@ -47,7 +47,7 @@ flowchart TB
       AUD["Audit + metrics"]
     end
     DATA[("Bundled JSON<br/>read-only, server-side only")]
-    BLOBS[("Netlify Blobs — prefixed by deploy context<br/>conversations · handovers · audit · metrics · mode")]
+    BLOBS[("Netlify Blobs — prefixed by deploy context<br/>conversations (1 key per message) · handovers<br/>audit · metrics · mode")]
   end
   GH -- "merge / PR" --> BUILD
   BUILD --> CDN
@@ -56,8 +56,8 @@ flowchart TB
 
   CUST --> CHAT
   STAFF --> STAFFUI
-  CHAT -- "POST /api/chat" --> API
-  STAFFUI -- "staff token" --> API
+  CHAT -- "POST /api/chat · poll during handover" --> API
+  STAFFUI -- "staff token · poll 3–10 s" --> API
   API --> ORCH
   ORCH --> GUARD
   ORCH --> ACC

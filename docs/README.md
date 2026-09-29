@@ -42,7 +42,7 @@ Kopano Microfinance is a licensed micro lender (regulated by NBFIRA) with four b
 | 2 | Policy answers | Retrieval over the knowledge base. **Every answer shows its source document** |
 | 3 | Identity verification | Registered mobile number **and** last 4 digits of Omang/passport must both match before any account information is shared |
 | 4 | Account answers | For a verified customer: next payment date and amount, and outstanding balance. **Figures come from the data, never from the model** |
-| 5 | Human handover | Follow Kopano's transfer rules. Handed-over conversations appear in a staff-visible queue with the transcript and customer details. **After handover the assistant stops replying** |
+| 5 | Human handover | Follow Kopano's transfer rules. Handed-over conversations appear in a staff-visible queue with the transcript and customer details. **After handover the assistant stops replying.** (Client addition: the agent replies in the same chat, then hands back to the bot.) |
 | 6 | Deployed | Reachable during the walkthrough. If deployment fails, demo locally and explain why |
 | 7 | README | How to run it, how to deploy it, design decisions, known limitations, next steps |
 
@@ -57,15 +57,15 @@ Kopano Microfinance is a licensed micro lender (regulated by NBFIRA) with four b
 | Tests | Automated checks that the assistant behaves correctly | Cheap and high-value for verification and handover rules |
 | Audit log | What was said, to whom, and on what basis | Fits a regulated lender and an Operations role |
 
-**Chosen extensions:** **Tests**, **Audit log** and **Payment allocation** (conservative version).
+**Chosen extensions:** **Tests**, **Audit log**, **Payment allocation** (conservative version) and **Agent view** (simplest form).
 
 - **Payment allocation** is the only extension that tackles the client's headline complaint: customers who have paid are still being chased.
 - **Tests** protect verification, handover and figure logic, including during live changes in the walkthrough.
 - **Audit log** records what the assistant told each customer and why, which a regulated lender needs.
+- **Agent view** was added after Gaone asked for agents to reply in the same chat and then hand back to the bot (client answer to question 9). It's kept to claim, reply and return.
 
 **Not chosen:**
 - **Staff mode:** letting the model write SQL is a risk to figure accuracy and data safety, and it isn't one of the client's stated problems.
-- **Agent view:** mostly plumbing, and the core queue already shows the conversation.
 - **Combined answers:** penalty edge cases and conflicts with stale data. It's a stretch goal if time allows, starting with the settlement quote.
 
 See [ARCHITECTURE.md § Open decisions](ARCHITECTURE.md#11-open-decisions), D5.
@@ -194,7 +194,7 @@ Record the answers here as they are given.
 | 6 | Who works the handover queue, and how quickly do they respond inside and outside hours? | _pending_ |
 | 7 | Is there a preferred hosting platform or any data-residency constraint? | _pending_ |
 | 8 | What counts as success for Kopano after launch (fewer calls, fewer complaints, fewer wrong chases)? | _pending_ |
-| 9 | After a chat is handed over, how does the agent get back to the customer: call, SMS, or reply in the chat? What should happen for customers who haven't verified yet? | _pending_ |
+| 9 | After a chat is handed over, how does the agent get back to the customer: call, SMS, or reply in the chat? What should happen for customers who haven't verified yet? | **Answered 2026-09-29.**<br>• **Approach:** up to us.<br>• **Preferred:** the agent replies **in the same chat** and, when done, **hands back to the bot**, which continues. The bot is paused while the agent is in control.<br>• **Sessions:** 60 minutes maximum, or close after 5 minutes idle.<br>• **Unverified customers:** hand over straight away; collecting details is optional.<br>• **Our interpretation, confirmed:** timers pause during handover, verification lasts the whole session, and out-of-hours handovers stay queued. See ARCHITECTURE D10 and D11 |
 
 ## 9. Running and deploying
 
