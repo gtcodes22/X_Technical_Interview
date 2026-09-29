@@ -1,0 +1,35 @@
+sequenceDiagram
+  autonumber
+  actor C as Customer
+  participant UI as Chat page
+  participant F as /api/chat
+  participant O as Orchestrator (src/core)
+  participant D as Bundled JSON
+  participant L as LLM provider
+  participant B as Netlify Blobs
+
+  C->>UI: "When is my next payment?"
+  UI->>F: POST conversationId + message
+  F->>B: load conversation (strong consistency)
+  F->>O: handle turn
+  O->>O: handed over? rule-based handover triggers?
+  O->>L: classify intent (verification details stripped)
+  L-->>O: account question
+  O-->>F: state VERIFYING — text + verify_form
+  F->>B: save conversation + audit record
+  F-->>UI: messages
+
+  C->>UI: submits mobile number + last 4 of ID
+  UI->>F: POST action=verify (never sent to the LLM)
+  F->>O: verify
+  O->>D: match normalised phone + id_last4 in loans.json
+  alt match
+    O->>D: borrower's loans + matched allocations
+    O-->>F: state VERIFIED — account_card (figures from data) + text
+  else third failure
+    O->>B: create handover (reason, transcript, details)
+    O-->>F: state HANDED_OVER — handover_notice (agent hours aware)
+  end
+  F->>B: save conversation + audit record (inputs masked)
+  F-->>UI: messages
+  Note over UI,B: After HANDED_OVER the bot never replies again. New messages are stored for the agent.

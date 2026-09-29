@@ -8,6 +8,41 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### Added — 2026-09-29 (diagrams)
+- `docs/diagrams/`: Mermaid sources plus rendered SVGs for three views:
+  - **Full system** (`system`): offline pipeline, contract, CI, Netlify and external services.
+  - **One chat turn** (`turn-sequence`): the verification path.
+  - **Conversation states** (`conversation-states`).
+- They replace the outdated ASCII diagram in ARCHITECTURE §2 (§2.1–2.3).
+- **Why:** Checkpoint 2 asks for an architecture diagram. Mermaid sources are versioned, diffable and render on GitHub. The SVGs render anywhere.
+
+### Added — 2026-09-29 (tooling)
+- OPERATIONS §6, tooling:
+  - **Docker is kept out of the Netlify production path.** Proposed uses: a reproducible Python ingest image, a local Prometheus/Grafana/OpenTelemetry stack, a portable runtime image as a plan B host, and local Postgres.
+  - A map from every tool in the job ad to where it fits, tagged [Day], [Stretch] or [Next].
+- **Notable reasoning:**
+  - **Prometheus** can't scrape serverless functions, so the plan is a `/api/metrics` endpoint built from aggregates in Blobs.
+  - **OpenTelemetry spans must be flushed** before a function returns.
+  - **BullMQ** needs a long-running worker, so it's incompatible with Netlify.
+  - **Redis (Upstash)** fixes lost counter updates in Blobs, which is last-write-wins.
+  - **Supabase Auth** is the path to proper staff login.
+- Recorded local tooling: Netlify CLI and `gh` are not installed.
+- Runbooks renumbered from OPERATIONS §6 to §7.
+
+### Added — 2026-09-29 (operations)
+- New `docs/OPERATIONS.md`, with each item tagged [Day], [Stretch] or [Next]:
+  - **Deployment:** GitHub → Netlify, deploy previews on PRs, atomic deploys with one-click rollback, and per-context environment variables.
+  - **CI/CD:** typecheck, Vitest (unit, mocked conversations, contract validation), pytest, contract drift check, secret scan, post-deploy smoke test.
+  - **Monitoring:** `/api/health`, structured logs without personal data, latency, LLM errors and spend, handover backlog, verification abuse, and an external uptime monitor. Proposed SLOs and alerts.
+  - **Graceful degradation:** `normal` / `degraded` / `handover_only` modes, switchable from the staff page.
+  - **Security operations**, backup and restore (with restore testing), and runbooks R1–R5.
+- **Key decisions and why:**
+  - **The Netlify build command runs typecheck and tests,** so a broken build can never publish even without GitHub Actions.
+  - **Blobs store names are prefixed with the deploy context.** Site-wide stores are shared across contexts, so previews would otherwise pollute the production handover queue.
+  - **Lock auto-publishing during the walkthrough,** so a stray push can't change the demo.
+  - **Rate-limit verification per IP [Stretch].** The 3-attempt limit is per conversation and can be reset by starting a new chat.
+- Added `/api/health` to ARCHITECTURE §3.1, and OPERATIONS.md to the README documentation map.
+
 ### Added — 2026-09-29 (chat interface design)
 - ARCHITECTURE §5.1, customer chat page:
   - Vite with vanilla TypeScript, aiming for under 50 KB, mobile-first.
