@@ -1,0 +1,90 @@
+flowchart TB
+  subgraph USERS["Users"]
+    CUST["Customer<br/>(phone browser)"]
+    STAFF["Kopano staff"]
+  end
+
+  subgraph OFFLINE["① Offline data pipeline — Python (laptop, or Docker image)"]
+    XLSX[("kopano_data.xlsx")]
+    KBDOCS[("Knowledge_Base/<br/>11 documents")]
+    CLEAN["Extract + clean<br/>pandas · python-docx · pdfplumber<br/>phones · references · amounts · dates"]
+    DUCK["DuckDB SQL — scripts/sql/<br/>01 duplicates · 02 reference match<br/>03 phone match · 04 allocations · 05 summary"]
+    CHECKS{"90_checks.sql<br/>zero rows?"}
+    FAIL["Ingest stops<br/>nothing written"]
+    XLSX --> CLEAN
+    KBDOCS --> CLEAN
+    CLEAN --> DUCK --> CHECKS
+    CHECKS -- "no" --> FAIL
+  end
+
+  CONTRACT[["② data/generated/ — JSON contract (committed)<br/>manifest · loans · payments · allocations · kb-chunks"]]
+  CHECKS -- "yes" --> CONTRACT
+  CLEAN -- "KB chunks" --> CONTRACT
+
+  subgraph DELIVERY["③ Source control and CI"]
+    GH["GitHub<br/>branch → PR → main"]
+    GHA["GitHub Actions<br/>pytest · vitest · typecheck · drift check"]
+  end
+  CONTRACT --> GH
+  GH --> GHA
+
+  subgraph NETLIFY["④ Netlify"]
+    BUILD["Build gate<br/>npm ci → typecheck → test → vite build<br/>atomic deploys · previews on PRs"]
+    subgraph CDN["CDN — static pages"]
+      CHAT["index.html<br/>customer chat"]
+      STAFFUI["staff.html<br/>queue · audit · dashboard · kill switch"]
+    end
+    subgraph FN["Functions — TypeScript thin adapters"]
+      API["/api/chat · /api/conversation/:id<br/>/api/handovers · /api/audit<br/>/api/health · /api/metrics"]
+      SCHED["Scheduled checker<br/>every 15 min"]
+    end
+    subgraph CORE["src/core — pure, tested logic"]
+      ORCH["Orchestrator<br/>conversation state machine"]
+      GUARD["Guardrails<br/>verification · handover rules · agent hours"]
+      ACC["Account service<br/>figures rendered by code"]
+      RET["Retrieval<br/>BM25 · superseded policy filtered"]
+      LLM["LLM wrapper<br/>timeout · retry · fallback · spend"]
+      AUD["Audit + metrics"]
+    end
+    DATA[("Bundled JSON<br/>read-only, server-side only")]
+    BLOBS[("Netlify Blobs — prefixed by deploy context<br/>conversations · handovers · audit · metrics · mode")]
+  end
+  GH -- "merge / PR" --> BUILD
+  BUILD --> CDN
+  BUILD --> FN
+  CONTRACT -. "bundled at build" .-> DATA
+
+  CUST --> CHAT
+  STAFF --> STAFFUI
+  CHAT -- "POST /api/chat" --> API
+  STAFFUI -- "staff token" --> API
+  API --> ORCH
+  ORCH --> GUARD
+  ORCH --> ACC
+  ORCH --> RET
+  ORCH --> LLM
+  ORCH --> AUD
+  GUARD --> DATA
+  ACC --> DATA
+  RET --> DATA
+  ORCH --> BLOBS
+  AUD --> BLOBS
+  SCHED --> BLOBS
+
+  subgraph EXT["⑤ External services"]
+    PROVIDER["LLM provider<br/>key supplied in the brief"]
+    UPTIME["Uptime monitor"]
+    ALERT["Slack / email webhook"]
+    OBS["Grafana · Prometheus · OTel collector"]
+  end
+  LLM -- "HTTPS · verification details never sent" --> PROVIDER
+  UPTIME -. "GET /api/health" .-> API
+  SCHED -. "threshold alerts" .-> ALERT
+  OBS -. "scrape /api/metrics · OTLP traces" .-> API
+
+  classDef stretch stroke-dasharray: 5 5
+  class SCHED,UPTIME,ALERT,OBS,GHA stretch
+  classDef store fill:#eef4ff,stroke:#4a6fa5
+  class DATA,BLOBS,CONTRACT store
+  classDef bad fill:#fdecea,stroke:#c0392b
+  class FAIL bad

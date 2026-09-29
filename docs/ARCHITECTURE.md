@@ -12,26 +12,32 @@
 
 ## 2. Components (proposed)
 
-```
- ┌──────────────┐     HTTPS      ┌──────────────────────────────────────────────┐
- │ Customer chat│ ─────────────▶ │                API server                    │
- │  (web page)  │ ◀───────────── │                                              │
- └──────────────┘                │  ┌───────────────┐   ┌────────────────────┐   │
-                                 │  │ Conversation  │──▶│ Guardrails / rules │   │
- ┌──────────────┐                │  │ orchestrator  │   │ (handover triggers,│   │
- │ Staff queue  │ ─────────────▶ │  │ (state machine│   │  verification)     │   │
- │ (web page)   │ ◀───────────── │  └──────┬────────┘   └────────────────────┘   │
- └──────────────┘                │         │                                     │
-                                 │   ┌─────┴─────┬───────────────┬────────────┐  │
-                                 │   ▼           ▼               ▼            ▼  │
-                                 │ Account    Policy          LLM client   Audit │
-                                 │ service    retrieval       (timeouts,   log   │
-                                 │            (KB chunks)     retries)           │
-                                 └───┬───────────┬───────────────┬────────────┬─┘
-                                     ▼           ▼               ▼            ▼
-                              data/generated/*.json         LLM provider  Netlify Blobs
-                              (loans, payments, allocations,              (conversations,
-                               KB chunks — built by Python)               handovers, audit)
+### 2.1 Full system
+
+![Full system architecture](diagrams/system.svg)
+
+The diagram has five zones:
+1. **Offline Python pipeline:** extract and clean the data, match it with DuckDB SQL, then run the checks.
+2. **The JSON contract.**
+3. **GitHub and CI.**
+4. **Netlify:** the build gate, static pages, thin functions, `src/core` logic, bundled JSON and Blobs.
+5. **External services.**
+
+Dashed boxes are stretch items.
+
+### 2.2 One chat turn (verification path)
+
+![Chat turn sequence](diagrams/turn-sequence.svg)
+
+### 2.3 Conversation states
+
+![Conversation states](diagrams/conversation-states.svg)
+
+**Diagram sources:** the `.mmd` files in [diagrams/](diagrams/) are the source of truth. GitHub renders Mermaid natively. To regenerate the SVGs after editing a source:
+
+```bash
+cd docs/diagrams
+npx -y -p @mermaid-js/mermaid-cli mmdc -i system.mmd -o system.svg -b white
 ```
 
 The API server, UIs and all runtime logic are **TypeScript**. The JSON in `data/generated/` is produced offline by **Python** scripts (§4).
@@ -84,6 +90,9 @@ Browser ──▶ Netlify CDN ── static: /index.html (chat), /staff.html (qu
 | `/api/conversation/:id` | GET | Reload a conversation (e.g. after a page refresh) |
 | `/api/handovers` | GET | Staff queue (needs the staff token) |
 | `/api/audit` | GET | Audit records, filterable by conversation (needs the staff token) |
+| `/api/health` | GET | Commit SHA, schema version, `as_at`, data counts, Blobs check. See [OPERATIONS.md](OPERATIONS.md) §3 |
+
+Deployment, CI/CD, monitoring and runbooks are in [OPERATIONS.md](OPERATIONS.md). **Blobs store names are prefixed with the deploy context**, so deploy previews never write into production data.
 
 **Key rule:** functions stay thin. All the logic lives in `src/core/`: verification, handover rules, account answers, allocation, retrieval and agent hours. That makes it testable without Netlify and portable if hosting changes.
 
