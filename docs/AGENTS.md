@@ -47,6 +47,12 @@ These come from the assessment brief and Kopano's own policies. Breaking one is 
 - **Record client answers in [README.md § Questions for the client](README.md#8-questions-for-the-client).**
 - Keep changes small and commit often (the brief asks for regular saves).
 - Add or update tests with any change to verification, handover or figure logic.
+- **Write for the next reader, not just yourself.** Code and comments must be clear to a fellow junior developer and to a senior engineer reviewing it:
+  - Use descriptive names.
+  - Keep functions small.
+  - Every file starts with a one- or two-line comment saying what it's for.
+  - Comments explain *why* (the business rule or policy it enforces, with the doc reference), not *what* the code already says.
+  - Avoid clever one-liners where a plain loop reads better.
 - Match the existing code style. Prefer clear code over clever code, because every line must be explainable in the walkthrough.
 - If a requirement is ambiguous, write the question in the README instead of guessing silently.
 

@@ -8,6 +8,17 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M2 — Runtime foundations — 2026-09-29
+- `src/core/contract.ts`: types and loader for `data/generated/`, which refuses an unknown schema major version.
+- `src/core/phone.ts`: tested against the same fixtures as the Python version.
+- `src/core/conversation-store.ts`:
+  - Blobs implementation with one key per message plus `meta`, handover and audit stores, and an in-memory twin for tests.
+- `src/core/hours.ts`: agent hours in Botswana time, and "next available" (public holidays not yet modelled).
+- `src/core/masking.ts`: masking of phones and ID digits, and redaction of free text before storage or the LLM.
+- 26 Vitest tests.
+- **LLM model chosen:** `gpt-4.1-mini` (OpenAI), for low latency and cost. Set as `LLM_MODEL`.
+- AGENTS.md: added the "write for the next reader" readability convention.
+
 ### M1 — Data pipeline — 2026-09-29
 - `scripts/ingest.py` + `scripts/kopano/` (cleaning, KB chunking) + `scripts/sql/01–05, 90`. Output: `data/generated/` (150 loans, 32 payments, 43 KB chunks, manifest). Pinned `scripts/requirements.txt`; pytest on the shared phone fixtures, references, amounts and dates (24 tests).
 - **Allocation result:** 17 matched (P48,580.57), 7 needs review, 4 duplicates, 4 unmatched. O SEBEGO → KM-L-0078 is `needs_review`.
