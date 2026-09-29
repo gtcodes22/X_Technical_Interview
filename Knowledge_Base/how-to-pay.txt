@@ -1,0 +1,48 @@
+HOW TO PAY YOUR LOAN
+====================
+
+Always use your loan ID as the payment reference, for example KM-L-0123. You can find it on your loan agreement and on every SMS we send you. Payments without a correct reference take longer to allocate to your loan.
+
+Orange Money
+------------
+
+1. Open Orange Money and choose Pay Bill
+2. Enter merchant code 5521 (Kopano Microfinance)
+3. Enter your loan ID as the reference
+4. Enter the amount and confirm with your PIN
+
+MyZaka
+------
+
+1. Open MyZaka and choose Pay Merchant
+2. Enter merchant number 88031
+3. Enter your loan ID as the reference
+4. Enter the amount and confirm with your PIN
+
+Smega
+-----
+
+1. Open Smega and choose Pay Merchant
+2. Enter merchant code 4417
+3. Enter your loan ID as the reference
+4. Enter the amount and confirm with your PIN
+
+Bank transfer (EFT)
+-------------------
+
+- Bank: Kalahari Commercial Bank
+- Account name: Kopano Microfinance (Pty) Ltd
+- Account number: 1002 3345 781
+- Branch code: 290167
+- Reference: your loan ID
+
+How long payments take to reflect
+---------------------------------
+
+Orange Money, MyZaka, Smega: Within 1 business day
+Bank transfer: Within 2 business days
+Any payment with a missing or incorrect reference: Up to 5 business days
+
+The date we use to decide whether you paid on time is the date the payment was received, not the date it reflected on your loan.
+
+Kopano staff will never ask for your mobile money PIN or banking password.

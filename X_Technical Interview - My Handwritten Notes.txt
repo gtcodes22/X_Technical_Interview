@@ -1,0 +1,15 @@
+X_Technical Interview - My Notes
+
+1. Chat interface - that's what I'm building.
+
+
+Primary Extensions:
+
+- Payment allocation
+- Tests
+- Audit Log
+
+
+
+
+
