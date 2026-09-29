@@ -8,6 +8,12 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### Changed — 2026-09-29 (documentation layout)
+- Root `README.md` trimmed to the essentials, with the live link at the top and a short note that this is a technical assessment.
+- Assessment material moved from `docs/README.md` to `Job_Info/TECHNICAL_INTERVIEW_INFO.md`: brief, requirements, extensions, timeline, goals, inputs and client Q&A.
+- `docs/README.md` is now a lean documentation index, plus the data/policy findings and handover triggers.
+- Links in AGENTS.md and ARCHITECTURE.md updated.
+
 ### M8 — Handoff — 2026-09-29
 - Root `README.md`: what it does (core + four extensions), run locally, regenerate data, deploy to Netlify, design decisions, known limitations, next steps.
 - `docs/README.md` status and §9 now point to the root README. ROADMAP: all milestones done.

@@ -537,7 +537,7 @@ A conversation can be handed over more than once. Each handover creates a new qu
 | D2 | Storage | Bundled JSON (reference data) + Netlify Blobs (state) vs Netlify Database | Proposed: JSON + Blobs (§3.2) |
 | D3 | Retrieval method | BM25, plus embeddings if the provider offers them | Proposed (§3) |
 | D4 | Hosting platform | Netlify | **Decided 2026-09-29** (user choice: easy deployment) |
-| D5 | Extensions chosen | See README §2 | **Decided 2026-09-29, revised the same day:** Tests, Audit log, Payment allocation (conservative), **Agent view (simplest form)**, added after the client asked for agents to reply in the chat. Combined answers (settlement quote) only as a stretch goal. Staff mode dropped |
+| D5 | Extensions chosen | See [TECHNICAL_INTERVIEW_INFO.md](../Job_Info/TECHNICAL_INTERVIEW_INFO.md) §2 | **Decided 2026-09-29, revised the same day:** Tests, Audit log, Payment allocation (conservative), **Agent view (simplest form)**, added after the client asked for agents to reply in the chat. Combined answers (settlement quote) only as a stretch goal. Staff mode dropped |
 | D6 | Multi-loan borrowers | Ask which loan vs answer for all | Open (ask client) |
 | D7 | P75 returned-payment fee status | Still valid vs superseded | Open (ask client) |
 | D8 | Unallocated payments in answers | Ignore with caveat vs show matched vs full allocation | Proposed: show `matched` only; everything else to a human (§4.2). Confirm with client |
