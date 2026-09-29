@@ -8,6 +8,12 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M7 — Staff page + Agent view — 2026-09-29
+- `src/core/agent.ts`: `claim` (refused with 409 if another agent holds the chat), `reply` (claiming agent only), `returnToAssistant` (state back to `VERIFIED`/`ANONYMOUS`, session timers restart, internal note to audit only).
+- `netlify/functions/handovers.ts`: staff API behind `x-staff-token` — queue, detail (transcript, loans with masked phone and **no ID digits**, payment candidates, audit), claim/reply/return.
+- `staff.html`/`staff.ts`: sign-in with token + agent name (sessionStorage), queue polled every 10 s (waiting first), detail polled every 3 s (paused while typing), audit log panel.
+- Test: full round trip handover → claim → second agent refused → reply → return → bot answers again with verification kept (35 tests).
+
 ### M3–M6 — Chat, policy answers, verification, handover — 2026-09-29
 - **M3** `orchestrator.ts` state machine, `/api/chat`, `/api/conversation/:id` (reload + polling), chat page (structured messages rendered with `textContent`, verify form, account card, source chips, handover banner, error + retry, new-chat on close), `runtime.ts` wiring.
 - **M4** `llm.ts` (OpenAI via fetch, 20 s timeout, one retry, `LlmError` → safe fallback reply; keyword fallback for intent), `retrieval.ts` (MiniSearch, superseded chunks never indexed), answers only from retrieved extracts with `SOURCES:` → source chips; `NO_ANSWER` → handover.

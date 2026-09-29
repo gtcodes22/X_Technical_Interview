@@ -8,8 +8,22 @@
   </head>
   <body>
     <main class="staff">
-      <h1>Kopano Staff — Handover queue</h1>
-      <div id="app" class="muted">Loading…</div>
+      <header class="staff-header">
+        <h1>Kopano — Handover queue</h1>
+        <p id="who" class="muted"></p>
+      </header>
+      <form id="login" class="login">
+        <label>Staff token <input name="token" type="password" required /></label>
+        <label>Your name <input name="agentName" required maxlength="40" /></label>
+        <button type="submit">Sign in</button>
+      </form>
+      <div id="app" class="staff-grid" hidden>
+        <section>
+          <h2>Queue</h2>
+          <ul id="queue" class="queue"></ul>
+        </section>
+        <section id="detail" class="detail"><p class="muted">Select a conversation.</p></section>
+      </div>
     </main>
     <script type="module" src="./staff.ts"></script>
   </body>

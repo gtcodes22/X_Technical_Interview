@@ -66,3 +66,24 @@ button:disabled { opacity: 0.5; cursor: default; }
 .verify label { display: grid; gap: 4px; font-size: 0.875rem; }
 .verify input { padding: 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; background: var(--surface); color: var(--text); }
 .new-chat { align-self: center; }
+
+.staff-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.login { display: grid; gap: 10px; max-width: 320px; }
+.login label { display: grid; gap: 4px; }
+.login input, .reply input { padding: 8px; border: 1px solid var(--border); border-radius: 8px; font: inherit; background: var(--surface); color: var(--text); }
+.staff-grid { display: grid; grid-template-columns: minmax(240px, 1fr) 2fr; gap: 16px; }
+@media (max-width: 720px) { .staff-grid { grid-template-columns: 1fr; } }
+.queue { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.queue-item { padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; }
+.queue-item.waiting { border-left: 4px solid var(--danger); }
+.queue-item.with_agent { border-left: 4px solid var(--brand); }
+.queue-item.open { outline: 2px solid var(--brand); }
+.detail { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: grid; gap: 12px; }
+.transcript { max-height: 45vh; overflow-y: auto; display: grid; gap: 4px; font-size: 0.9rem; }
+.transcript .line { padding: 4px 8px; border-radius: 6px; background: var(--bg); white-space: pre-wrap; }
+.transcript .agent { background: var(--agent); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reply { display: flex; gap: 8px; flex: 1; min-width: 240px; }
+.reply input { flex: 1; }
+button.secondary { background: transparent; color: var(--brand); border: 1px solid var(--brand); }
+.audit pre { white-space: pre-wrap; font-size: 0.75rem; margin: 4px 0; }
