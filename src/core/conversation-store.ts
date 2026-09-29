@@ -45,6 +45,7 @@ export interface HandoverEntry {
   returnedAt: string | null;
   customerName: string | null;
   loanIds: string[];
+  paymentCandidates: string[]; // possible payments for "I already paid" cases, for staff review
 }
 
 export interface AuditRecord {

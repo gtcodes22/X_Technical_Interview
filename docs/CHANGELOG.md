@@ -8,6 +8,14 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M3–M6 — Chat, policy answers, verification, handover — 2026-09-29
+- **M3** `orchestrator.ts` state machine, `/api/chat`, `/api/conversation/:id` (reload + polling), chat page (structured messages rendered with `textContent`, verify form, account card, source chips, handover banner, error + retry, new-chat on close), `runtime.ts` wiring.
+- **M4** `llm.ts` (OpenAI via fetch, 20 s timeout, one retry, `LlmError` → safe fallback reply; keyword fallback for intent), `retrieval.ts` (MiniSearch, superseded chunks never indexed), answers only from retrieved extracts with `SOURCES:` → source chips; `NO_ANSWER` → handover.
+- **M5** `account.ts`: verification requires phone + last 4 on the same loan; multi-loan borrowers see all loans; account card figures from `loans.json`, arrears shown as "overdue since", matched payments shown as "received, not yet reflected"; 3 failures → handover; verification inputs masked everywhere.
+- **M6** `handover-rules.ts` (agent request, complaint/upset, dispute/"already paid", hardship, payment holiday/restructure/top-up, fraud) run before the LLM; handover entry with payment candidates for "already paid"; agent-hours-aware notice; bot silent in `HANDED_OVER`/`WITH_AGENT`; sessions close after 60 min / 5 min idle while the bot is in control.
+- Tests: 34 passing (scripted conversations with mocked LLM). Live check with `gpt-4.1-mini` (`LIVE=1 npx vitest run tests/live.test.ts`): MyZaka steps cited from How to Pay; late payment answered from v3.0 only.
+- **Note:** M3–M6 were built in one pass under time pressure and committed per milestone by file group; the individual intermediate commits are not each independently buildable — the M6 commit is.
+
 ### M2 — Runtime foundations — 2026-09-29
 - `src/core/contract.ts`: types and loader for `data/generated/`, which refuses an unknown schema major version.
 - `src/core/phone.ts`: tested against the same fixtures as the Python version.
