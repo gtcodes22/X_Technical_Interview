@@ -119,6 +119,8 @@ The LLM is **mocked in all automated tests**, so they're deterministic and cost 
 | **LLM token spend vs budget** | The key has a hard spending limit. Running out means the assistant stops working | Token usage from the provider's responses, summed daily in Blobs | [Stretch] |
 | **Handover rate by reason** | This is the business signal: a spike in "dispute" or "already paid" matters to Gaone | Audit log | [Stretch] |
 | **Oldest open handover age** (during agent hours) | Customers are waiting for a human | Handover queue | [Stretch] |
+| **Time to claim and time with agent** | How quickly agents pick up handovers, and how long they hold them. Conversations stuck `WITH_AGENT` (an agent forgot to return one) need a nudge | Handover records (`createdAt`, `claimedAt`, `returnedAt`) | [Stretch] |
+| **Polling load** | Customer and staff pages poll every 3–10 s while a handover is open. Each poll is a function call, which costs credits | Function invocations | [Stretch] |
 | **Verification failure rate, per client IP** | The last 4 digits have only 10,000 combinations. Many new conversations from one IP means brute force | Audit log + logs | [Stretch] |
 | **Function error rate and invocations** | Platform-level health | Netlify Observability (credit-based plans) and function logs | [Day] (dashboard exists) |
 | **Uptime** | Is the site reachable at all? | External monitor (e.g. UptimeRobot or Better Stack free tier) on `/api/health` | [Stretch] |
@@ -148,6 +150,7 @@ The LLM is **mocked in all automated tests**, so they're deterministic and cost 
 | LLM errors | Alert if more than 5% of turns in 15 min fall back |
 | Spend | Alert at 70% of the daily budget. Degrade automatically at 90% (see §4) |
 | Handover backlog | Alert if an open handover is older than 30 min during agent hours |
+| Stuck with agent | Alert if a conversation has been `WITH_AGENT` for more than 30 min with no messages |
 | Verification abuse | Alert if one IP has more than 10 failed verifications in an hour |
 | Uptime | Alert if `/api/health` fails 2 checks in a row |
 | **Correctness (by design, not monitored)** | 0 figures produced by the LLM. Enforced by structured messages and covered by tests |

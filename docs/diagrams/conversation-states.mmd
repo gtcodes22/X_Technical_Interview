@@ -4,9 +4,15 @@ stateDiagram-v2
   VERIFYING --> VERIFYING: failed attempt (1st or 2nd)
   VERIFYING --> VERIFIED: phone + last 4 match same loan
   VERIFYING --> HANDED_OVER: 3rd failure
-  VERIFIED --> VERIFYING: 15 min idle, then account question
   ANONYMOUS --> HANDED_OVER: handover trigger
   VERIFIED --> HANDED_OVER: handover trigger
-  HANDED_OVER --> [*]: bot silent, agent takes over
-  note right of ANONYMOUS: policy questions answered with citations
-  note right of VERIFIED: bound to one borrower_id
+  HANDED_OVER --> WITH_AGENT: agent claims
+  WITH_AGENT --> VERIFIED: agent returns chat (customer was verified)
+  WITH_AGENT --> ANONYMOUS: agent returns chat (not verified)
+  ANONYMOUS --> CLOSED: 60 min total or 5 min idle
+  VERIFYING --> CLOSED: 60 min total or 5 min idle
+  VERIFIED --> CLOSED: 60 min total or 5 min idle
+  CLOSED --> [*]
+  note right of HANDED_OVER: bot silent, timers paused
+  note right of WITH_AGENT: agent replies in same chat, bot silent, timers paused
+  note left of VERIFIED: bound to one borrower_id for the rest of the session

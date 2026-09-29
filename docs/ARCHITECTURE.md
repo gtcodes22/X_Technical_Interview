@@ -45,7 +45,7 @@ The API server, UIs and all runtime logic are **TypeScript**. The JSON in `data/
 | Component | Responsibility |
 |---|---|
 | Customer chat UI | Send messages and show replies with source citations. Shows a "transferred to an agent" state when handed over |
-| Staff queue UI | Lists handed-over conversations with the transcript, customer details and the handover reason |
+| Staff queue UI (Agent view) | Lists handed-over conversations with the transcript, customer details and the handover reason. The agent claims a conversation, replies in the same chat, and returns it to the assistant when done |
 | Conversation orchestrator | Holds per-conversation state (see §5) and routes each message |
 | Guardrails / rules | Verification checks, attempt counting, and rule-based handover detection |
 | Account service | Lookups over `loans.json` and `allocations.json`, **scoped to the verified borrower only** |
@@ -87,8 +87,11 @@ Browser ──▶ Netlify CDN ── static: /index.html (chat), /staff.html (qu
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/api/chat` | POST | One customer turn: `{conversationId, message}` → `{reply, sources, state}` |
-| `/api/conversation/:id` | GET | Reload a conversation (e.g. after a page refresh) |
+| `/api/conversation/:id?after=<messageId>` | GET | Reload a conversation after a refresh, and **poll for new agent messages** (returns only messages after `after`) |
 | `/api/handovers` | GET | Staff queue (needs the staff token) |
+| `/api/handovers/:id/claim` | POST | Agent claims a conversation: `{agentName}` → state `WITH_AGENT`. Fails if another agent already holds it |
+| `/api/handovers/:id/reply` | POST | Agent sends a message: `{text}` (claiming agent only) |
+| `/api/handovers/:id/return` | POST | Agent returns the conversation to the assistant: `{note?}` → back to `ANONYMOUS` or `VERIFIED` |
 | `/api/audit` | GET | Audit records, filterable by conversation (needs the staff token) |
 | `/api/health` | GET | Commit SHA, schema version, `as_at`, data counts, Blobs check. See [OPERATIONS.md](OPERATIONS.md) §3 |
 
@@ -108,6 +111,13 @@ Deployment, CI/CD, monitoring and runbooks are in [OPERATIONS.md](OPERATIONS.md)
 | Fit here | One writer per conversation, low volume, a 2-hour build | Better if staff mode or audit reporting grows |
 
 Blobs is the lower-risk choice for the time available. The `Store` interface means moving to Postgres later only changes one file.
+
+**Key layout (because Blobs is last-write-wins).** With Agent view, the customer and the agent can write to the same conversation at the same moment. If the whole conversation were one blob, one of those writes would be lost. So:
+- Each message is its **own key**: `conversations/<id>/messages/<timestamp>-<random>`. Appends never overwrite each other. Listing by prefix returns them in order.
+- Conversation state (state, verified borrower, claiming agent, session times) is a **separate small key**: `conversations/<id>/meta`. It changes only at defined transitions.
+- `handovers/<id>` holds the queue entry. Claiming checks and writes it with strong consistency. The claim also records `claimedAt`, so a duplicate claim is detected and refused on the next read.
+
+**Residual race:** two agents pressing *Claim* in the same instant could both succeed, because Blobs has no compare-and-swap. That's acceptable with four agents. Postgres or Redis would fix it properly ([OPERATIONS.md](OPERATIONS.md) §6.2).
 
 ### 3.3 Netlify-specific concerns
 
@@ -312,19 +322,47 @@ State is held server-side per conversation:
 
 ```
  ANONYMOUS ──(asks about own account)──▶ VERIFYING ──(match)──▶ VERIFIED
-     │                                      │
-     │                                      └─(3rd failure)──▶ HANDED_OVER
-     └──────────── any handover trigger, from any state ────────▶ HANDED_OVER
+     │                                      │                        │
+     │                                      └─(3rd failure)──┐       │
+     └──────── any handover trigger, from any bot state ─────┼───────┘
+                                                             ▼
+                                                        HANDED_OVER  (queued; bot silent)
+                                                             │ agent claims
+                                                             ▼
+                                                        WITH_AGENT   (agent replies in the same chat; bot silent)
+                                                             │ agent presses "Return to assistant"
+                                                             ▼
+                                   back to VERIFIED (if the customer was verified) or ANONYMOUS
+
+ Any state ──(60 min since start, or 5 min idle while the BOT is in control)──▶ CLOSED
 ```
 
 - **ANONYMOUS:** general policy questions are answered (they are not personal information). Any account question starts verification.
 - **VERIFYING:** ask for the registered mobile number and the last 4 digits of the Omang/passport. Both must match the **same** loan record. Failures are counted server-side. The third failure triggers handover.
-- **VERIFIED:** the conversation is bound to one `borrower_id`. Account queries can only read that borrower's loans. If the borrower has more than one loan, list them and ask which one, or answer for each (see Open decisions).
-- **HANDED_OVER:** the assistant sends one transfer message and **never replies again**. New customer messages are stored for the agent only.
+- **VERIFIED:** the conversation is bound to one `borrower_id` **for the rest of the session**. Account queries can only read that borrower's loans. If the borrower has more than one loan, list them and ask which one, or answer for each (see Open decisions).
+- **HANDED_OVER:** the assistant sends one transfer message, then **does not reply**. Customer messages are stored for the agent. **Unverified customers are handed over straight away**, with no contact details collected (client decision); the agent can verify them in the chat if needed.
+- **WITH_AGENT:** an agent has claimed the conversation and replies in the same chat. The **bot stays paused**.
+- **Return to assistant:** only the agent can do this. The bot posts "You're back with the Kopano Assistant", and the conversation resumes in `VERIFIED` if the customer was verified earlier in the session, otherwise `ANONYMOUS`. The agent may add a note, which is recorded in the audit log but not shown to the customer.
+- **CLOSED:** the session has ended. Further messages are refused, and the page offers "Start a new chat". A new chat must verify again.
+
+This satisfies the brief's "once handed over, the assistant stops replying": the bot is silent for the whole time a human is responsible, and only a human can hand control back.
+
+**Session rules (client decision):**
+
+| Rule | Value | Applies when |
+|---|---|---|
+| Maximum session length | 60 minutes from the first message | Bot in control (`ANONYMOUS`, `VERIFYING`, `VERIFIED`) |
+| Idle timeout | 5 minutes with no customer message | Bot in control |
+| **Timers paused** | — | `HANDED_OVER` and `WITH_AGENT`. The customer must not be timed out while waiting for, or talking to, a person |
+| Timers after handback | Both timers restart from the moment of return | Bot back in control |
+
+- **Outside agent hours:** on handover, the customer is told when agents are next available (Mon–Fri 08:00–17:00, Sat 08:30–13:00). The handover **stays in the queue**. If the customer leaves, they can come back later on the same device to see the agent's reply: the conversation ID is kept in `localStorage`, and the agent's reply is waiting in the chat.
+- **When a returning customer can see the history:** without the device, they start a new chat and must verify again. The transcript is **not shown to a new, unverified chat**, because it may contain account details.
+- **Timers are enforced server-side.** The page only displays them. Each request checks `startedAt` and `lastCustomerMessageAt` in `meta`.
 
 ### Message routing (per turn)
 
-1. If the conversation is `HANDED_OVER`, store the message and stop.
+1. Check the session. If it's `CLOSED` or past its time limits, close it and reply with the closed notice. If the conversation is `HANDED_OVER` or `WITH_AGENT`, store the message for the agent and stop (**no bot reply, no LLM call**).
 2. **Verification submission** (sent from the verification form, §5.1): check it in code. It **never goes to the LLM**, and the stored copy is masked.
 3. Run **rule-based handover checks** (keywords and patterns for agent requests, disputes, hardship, payment holiday, restructuring, top-up, complaints and fraud).
 4. Use the LLM to **classify intent**: policy question / account question / handover / small talk / out of scope. A handover result from either step 3 or step 4 wins.
@@ -389,6 +427,7 @@ State is held server-side per conversation:
   - Request: `{ conversationId?, message }` or `{ conversationId, action: "verify", phone, idLast4 }`
   - Response: `{ conversationId, state, messages: Message[] }`
 - `GET /api/conversation/:id` reloads the transcript after a page refresh.
+- `GET /api/conversation/:id?after=<messageId>` is **polled every 3 s while the state is `HANDED_OVER` or `WITH_AGENT`**, to show agent messages. Netlify Functions can't hold a connection open, so polling replaces push updates. Polling stops when the bot is back in control or the page is hidden.
 - It's plain request and response, with no streaming. Replies are short, figures arrive whole, and it keeps the function simple.
 
 **Behaviour:**
@@ -399,11 +438,12 @@ State is held server-side per conversation:
   - Submitting the form sends `action: "verify"`, which is checked in code and never passed to the LLM.
   - If the customer types their number and digits into the normal chat box instead, the server spots them with a pattern match and removes them before any text reaches the LLM.
   - Transcripts and the audit log store them masked, e.g. `71•••204` and `••21`.
-- **Verified session.** A verified conversation expires after **15 minutes of inactivity**. After that, account questions need verification again, which protects shared phones and cybercafés.
+- **Session.** It lasts at most 60 minutes, closes after 5 minutes idle while the bot is in control, and the timers pause during handover (§5). Verification lasts for the rest of the session. A closed session shows "This chat has ended" and a "Start a new chat" button. Short sessions also protect shared phones and cybercafés.
 - **After handover.**
-  - The banner appears and the assistant stops replying.
-  - The input stays open but its placeholder changes to "Add a message for the agent", and anything typed is stored for the agent with no bot reply.
-  - How the agent then responds is **open decision D10**, because Agent view isn't in scope.
+  - A `handover_notice` banner appears: "Connecting you to a Kopano agent" (or, outside hours, when agents are next available). The assistant stops replying.
+  - The input stays open with the placeholder "Message the agent". Messages are stored for the agent, with no bot reply.
+  - When an agent claims the chat, a notice says "Kagiso from Kopano has joined". Agent messages appear as a **distinct bubble style labelled with the agent's name**, so the customer always knows whether they're talking to a person or the bot.
+  - When the agent returns the chat, a notice says "You're back with the Kopano Assistant" and the bot resumes.
 - **Accessibility.**
   - The message list is an `aria-live="polite"` region.
   - Enter sends the message and Shift+Enter adds a new line.
@@ -429,14 +469,18 @@ Every turn ──▶ audit record written (masked inputs, sources, rows used, ru
 
 **How it works:**
 - **Access.** The page first asks for the staff token and keeps it in `sessionStorage`. Every staff API call sends it as a header.
-- **Queue.** A list of handovers, newest first, showing time, reason, customer name, loan ID (if verified) and status. It refreshes every 10 s by polling.
+- **Queue.** A list of handovers, oldest waiting first, showing wait time, reason, customer name, loan ID (if verified) and status (`waiting` / `with <agent>` / `returned`). It refreshes every 10 s by polling.
 - **Detail view.**
   - The full transcript, with verification inputs masked.
-  - The customer's loan details.
+  - The customer's loan details (if verified).
   - The handover reason and which rule fired.
   - Any `needs_review` payment candidates for their phone number (from Payment allocation).
-- **Audit tab.** The audit records for a conversation: each turn's message, reply, sources, data rows used, rule fired, model and latency.
-- **Read-only.** Staff can't reply here, because Agent view isn't in scope.
+- **Agent view (simplest form: claim, reply, return):**
+  1. **Claim.** The agent enters their name once per browser session, then presses **Claim**. The state becomes `WITH_AGENT`, and the customer sees that the agent has joined. Other agents see "with Kagiso" and can't reply.
+  2. **Reply.** A text box posts to `/api/handovers/:id/reply`. The transcript polls every 3 s for new customer messages while it's open.
+  3. **Return to assistant.** The agent can add an internal note, which goes to the audit log only. The bot resumes, and the customer stays verified if they were.
+  - **Not included:** transfers between agents, typing indicators, canned replies, attachments, and verifying customers from the staff page. The agent verifies in conversation if needed. All of these are listed as next steps.
+- **Audit tab.** The audit records for a conversation: each turn's message, reply, sources, data rows used, rule fired, model and latency, plus agent claims, replies and returns, with the agent's name.
 
 ## 6. Policy retrieval
 
@@ -449,10 +493,13 @@ Every turn ──▶ audit record written (masked inputs, sources, rows used, ru
 ## 7. Handover
 
 When a handover fires:
-1. Set the conversation to `HANDED_OVER` and record the reason (which rule, or LLM classification).
-2. Create a queue item: conversation ID, reason, timestamp, verified borrower details (if any), and the full transcript.
-3. Send the customer a transfer message. **Inside agent hours**, say an agent will respond shortly. **Outside hours**, say when agents are next available (Mon–Fri 08:00–17:00, Sat 08:30–13:00; closed Sundays and public holidays).
-4. From then on the assistant does not reply.
+1. Set the conversation to `HANDED_OVER`, record the reason (which rule, or LLM classification), and **pause the session timers**.
+2. Create a queue item: conversation ID, reason, timestamp, verified borrower details (if any), and a link to the full transcript. **Unverified customers are handed over straight away**, with no contact details collected.
+3. Send the customer a transfer message. **Inside agent hours**, say an agent will join shortly. **Outside hours**, say when agents are next available (Mon–Fri 08:00–17:00, Sat 08:30–13:00; closed Sundays and public holidays), and that they can return to this chat on the same device to see the reply.
+4. The assistant does not reply while the conversation is `HANDED_OVER` or `WITH_AGENT`.
+5. An agent claims the conversation, replies in the chat, then **returns it to the assistant**. The bot resumes in `VERIFIED` or `ANONYMOUS`, and the session timers restart.
+
+A conversation can be handed over more than once. Each handover creates a new queue entry linked to the same conversation.
 
 ## 8. Account answers
 
@@ -469,7 +516,7 @@ When a handover fires:
 |---|---|
 | Payment allocation | **Chosen.** Computed offline by the SQL stage (§4.2): deduplicate by `txn_ref`, match on normalised reference with a name check, then fall back to phone for review only. At runtime, only `matched` payments adjust the displayed position ("received but not yet allocated: P X"). If a customer says "I already paid", `needs_review` candidates for their phone number are attached to the handover |
 | Combined answers | Settlement = outstanding balance × 0.95, computed in code with the 5% rate taken from the KB. Late penalty = min(5% × instalment, P250) per missed instalment after the 5-day grace period |
-| Agent view | The staff queue page gains a reply box. Agent messages are appended to the conversation and shown to the customer |
+| Agent view | **Chosen (simplest form), at the client's request.** Claim, reply in the same chat, return to assistant. The customer page polls for agent messages. Messages are stored one per key to avoid lost writes (§3.2, §5, §5.2) |
 | Staff mode | Read-only natural-language questions → constrained SQL (read-only DB user or a whitelisted query set) |
 | Tests | Unit tests for phone normalisation, verification, handover rules and figure rendering, plus scripted conversation tests |
 | Audit log | One row per turn: conversation, borrower, message, reply, sources, data rows, rule fired, model and latency |
@@ -490,11 +537,12 @@ When a handover fires:
 | D2 | Storage | Bundled JSON (reference data) + Netlify Blobs (state) vs Netlify Database | Proposed: JSON + Blobs (§3.2) |
 | D3 | Retrieval method | BM25, plus embeddings if the provider offers them | Proposed (§3) |
 | D4 | Hosting platform | Netlify | **Decided 2026-09-29** (user choice: easy deployment) |
-| D5 | Extensions chosen | See README §2 | **Decided 2026-09-29:** Tests, Audit log, Payment allocation (conservative). Combined answers (settlement quote) only as a stretch goal. Staff mode and Agent view dropped |
+| D5 | Extensions chosen | See README §2 | **Decided 2026-09-29, revised the same day:** Tests, Audit log, Payment allocation (conservative), **Agent view (simplest form)**, added after the client asked for agents to reply in the chat. Combined answers (settlement quote) only as a stretch goal. Staff mode dropped |
 | D6 | Multi-loan borrowers | Ask which loan vs answer for all | Open (ask client) |
 | D7 | P75 returned-payment fee status | Still valid vs superseded | Open (ask client) |
 | D8 | Unallocated payments in answers | Ignore with caveat vs show matched vs full allocation | Proposed: show `matched` only; everything else to a human (§4.2). Confirm with client |
-| D10 | How agents respond to handed-over customers (no Agent view) | Agent calls or SMSes the registered number / customer leaves a contact number before handover / add Agent view later | Open (ask client). Unverified customers have no known number, so the flow may need to ask for one before handing over |
+| D10 | How agents respond to handed-over customers | Call/SMS vs reply in chat | **Decided 2026-09-29 (client):** agents reply in the same chat, then hand back to the bot. Unverified customers are handed over straight away, with no contact details collected |
+| D11 | Session lifetime | — | **Decided 2026-09-29 (client + us):** 60 min maximum, 5 min idle, both only while the bot is in control. Timers pause during `HANDED_OVER` and `WITH_AGENT`. Verification lasts the whole session. Outside hours, the handover stays queued and the customer can return on the same device |
 | D9 | Where SQL is used | DuckDB in offline ingest vs Postgres at runtime vs none | **Decided 2026-09-29:** DuckDB in the Python ingest for allocation, summaries and data-quality checks. Runtime stays JSON + Blobs. Revisit Netlify Database for the audit log if time allows |
 
 ## 12. Definition of done (for the 2-hour build)
@@ -504,6 +552,8 @@ When a handover fires:
 - [ ] Verification works with any phone format, and 3 failures lead to handover
 - [ ] Next due date and amount, and outstanding balance, come from the data with the "as at" caveat
 - [ ] Every handover trigger in the standards fires; the queue shows transcript, details and reason; the bot goes silent
+- [ ] An agent can claim, reply in the same chat (the customer sees it within ~3 s) and return the chat to the bot, which resumes with verification intact
+- [ ] Sessions close after 60 min or 5 min idle while the bot is in control, and never while waiting for or talking to an agent
 - [ ] LLM failure produces a safe fallback reply
 - [ ] README covers run, deploy, decisions, limitations and next steps
 - [ ] Chosen extensions work, or are clearly documented as incomplete

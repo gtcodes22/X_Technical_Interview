@@ -32,4 +32,13 @@ sequenceDiagram
   end
   F->>B: save conversation + audit record (inputs masked)
   F-->>UI: messages
-  Note over UI,B: After HANDED_OVER the bot never replies again. New messages are stored for the agent.
+  Note over UI,B: While HANDED_OVER or WITH_AGENT the bot is silent and timers are paused.
+  participant S as Staff page (agent)
+  S->>B: claim (agent name) — state WITH_AGENT
+  loop every 3 s while handed over
+    UI->>F: GET /api/conversation/:id?after=lastId
+    F-->>UI: new agent messages
+  end
+  S->>B: reply (stored as its own message key)
+  S->>B: return to assistant — state VERIFIED or ANONYMOUS, timers restart
+  UI->>F: poll sees "back with the assistant", polling stops

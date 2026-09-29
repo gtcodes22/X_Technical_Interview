@@ -8,6 +8,30 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### Decided — 2026-09-29 (client answer: handover round trip, sessions)
+- **Client (Gaone), question 9:**
+  - Agents reply **in the same chat** and **hand back to the bot** when done. The bot is paused meanwhile.
+  - Sessions last 60 min maximum, or close after 5 min idle.
+  - Unverified customers are handed over straight away, with no contact details needed.
+- **Our interpretation, confirmed by the user:**
+  - Session timers **pause** during `HANDED_OVER` and `WITH_AGENT`.
+  - Verification lasts **the whole session**.
+  - Outside hours, the handover stays queued, and the customer can return on the same device.
+- **D5 revised: Agent view added (simplest form: claim, reply, return).** Payment allocation is kept. **Why:** the client asked for it, and it closes D10. It's kept minimal to protect the 2-hour budget.
+- **D10 and D11 decided.** New states `WITH_AGENT` and `CLOSED`. Returning a chat resumes `VERIFIED` or `ANONYMOUS`.
+  - **Why this meets the brief:** the bot is silent for the whole time a human is responsible, and only a human can hand it back.
+- **Storage change:** one Blobs key per message, plus a separate `meta` key per conversation.
+  - **Why:** Blobs is last-write-wins. With the customer and the agent writing at once, storing the conversation as one blob would lose messages.
+  - The residual race when two agents claim at the same instant is documented.
+- **New endpoints:** `POST /api/handovers/:id/claim`, `/reply`, `/return`, and polling via `GET /api/conversation/:id?after=`. The customer page polls every 3 s during handover.
+- **Docs updated:**
+  - ARCHITECTURE: §2, §3.1, §3.2, §5 (states and session rules), §5.1, §5.2, §7, §9, §11, §12.
+  - README §2 and question 9.
+  - AGENTS rule 5.
+  - OPERATIONS: time to claim, stuck-with-agent alert, polling load.
+  - Diagrams updated and re-rendered.
+- **Replaced:** the earlier "15 min idle re-verification" rule, which the client's session rule supersedes.
+
 ### Added — 2026-09-29 (diagrams)
 - `docs/diagrams/`: Mermaid sources plus rendered SVGs for three views:
   - **Full system** (`system`): offline pipeline, contract, CI, Netlify and external services.
