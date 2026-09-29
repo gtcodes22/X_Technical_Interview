@@ -14,6 +14,7 @@ Built as the technical assessment for the **Junior Developer — Operations** ro
 |---|---|
 | [README.md](README.md) | Understand the task, the goals and the main concerns (this file) |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | See how the system is built, why, and which decisions are still open |
+| [OPERATIONS.md](OPERATIONS.md) | Deploy, roll back, see CI/CD checks, monitor the service, or handle an incident (runbooks) |
 | [AGENTS.md](AGENTS.md) | Work on the code yourself or with an AI coding tool. It lists the rules that must not be broken |
 | [CHANGELOG.md](CHANGELOG.md) | See every change made to the project, in order |
 | [IDEAS.md](IDEAS.md) | Browse ideas worth exploring later, and pick one up |

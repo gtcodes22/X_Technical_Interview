@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> ANONYMOUS
+  ANONYMOUS --> VERIFYING: asks about own account
+  VERIFYING --> VERIFYING: failed attempt (1st or 2nd)
+  VERIFYING --> VERIFIED: phone + last 4 match same loan
+  VERIFYING --> HANDED_OVER: 3rd failure
+  VERIFIED --> VERIFYING: 15 min idle, then account question
+  ANONYMOUS --> HANDED_OVER: handover trigger
+  VERIFIED --> HANDED_OVER: handover trigger
+  HANDED_OVER --> [*]: bot silent, agent takes over
+  note right of ANONYMOUS: policy questions answered with citations
+  note right of VERIFIED: bound to one borrower_id
