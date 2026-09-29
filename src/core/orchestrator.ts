@@ -255,7 +255,7 @@ function newConversation(now: Date): ConversationMeta {
 }
 
 /** 60 minutes from the (re)start, or 5 minutes idle — only while the bot is in control. */
-function sessionExpired(meta: ConversationMeta, now: Date): boolean {
+export function sessionExpired(meta: ConversationMeta, now: Date): boolean {
   const minutesSince = (iso: string) => (now.getTime() - new Date(iso).getTime()) / 60_000;
   return minutesSince(meta.startedAt) > SESSION_MAX_MINUTES || minutesSince(meta.lastCustomerMessageAt) > SESSION_IDLE_MINUTES;
 }

@@ -13,6 +13,8 @@ The build is split into milestones. **Each milestone ends with at least one comm
 | M6 | Handover + sessions | Rule + LLM handover triggers, queue entry, agent-hours notice, bot silence, 60 min / 5 min idle sessions paused during handover, payment candidates on "I already paid" | ✅ Done |
 | M7 | Staff page + Agent view | Token gate, queue, detail view, claim / reply / return, polling, audit tab | ✅ Done |
 | M8 | Hardening + handoff | Health complete, structured logs, smoke test, final README (run, deploy, limitations, next steps), lock auto-publishing | ✅ Done |
+| M9 | Refinements: quick wins | Handover rules match real requests only ("agent hours" no longer hands over) · redaction keeps merchant codes/amounts · closed/expired chats show no transcript on refresh (shared-phone privacy) · verify form restored after refresh · `/api/health` shows schema version, as-at date and counts · docs brought in line with the code | ✅ Done |
+| M10 | Refinements: larger items | Early settlement quote computed in code · per-IP verification rate limit · daily LLM token budget + degraded mode · `scripts/smoke_test.py` against the live URL · split `orchestrator.ts` into policy/account/handover modules · `kb.py` readability pass · tests for LLM-failure fallback, staff API 401 and golden policy questions · accept verification details typed in the chat · recalculate penalties since the export | ⏳ Next |
 
 **Stretch, in priority order:** degraded-mode kill switch · per-IP verification rate limit · ~~GitHub Actions CI~~ ✅ done · settlement quote (Combined answers) · Docker ingest image.
 

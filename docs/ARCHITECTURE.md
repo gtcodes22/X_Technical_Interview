@@ -1,6 +1,6 @@
 # Architecture
 
-> **Status: PROPOSED.** Nothing here is built yet. Each decision is marked **Proposed**, **Decided** or **Open**. When a decision changes, update it here and add an entry to [CHANGELOG.md](CHANGELOG.md).
+> **Status: BUILT (M0–M8), refinements in progress (M9–M10, see [ROADMAP.md](ROADMAP.md)).** This document started as the design; items still marked *Proposed* were implemented as described unless the CHANGELOG says otherwise. When a decision changes, update it here and add an entry to [CHANGELOG.md](CHANGELOG.md).
 
 ## 1. Design principles
 
@@ -139,12 +139,9 @@ package.json                 TypeScript deps + npm scripts
 scripts/                     ── PYTHON (offline, never deployed) ──
   requirements.txt           pinned: pandas, openpyxl, duckdb, python-docx, pdfplumber, pytest, requests
   ingest.py                  entry point: runs all steps, writes data/generated/
-  kopano/phone.py            phone normalisation (mirrors src/core/phone.ts)
-  kopano/references.py       payment reference normalisation ("KML 0078 school fees" → KM-L-0078)
-  kopano/loans.py            Loans sheet → cleaned DataFrame
-  kopano/payments.py         Payments sheet → cleaned DataFrame
-  kopano/db.py               loads cleaned frames into DuckDB, runs scripts/sql/ in order
+  kopano/cleaning.py         phones (mirrors src/core/phone.ts), references, amounts, dates
   kopano/kb.py               KB docs → kb-chunks.json
+  (loading, DuckDB and writing the contract live in ingest.py)
   sql/                       ── SQL (DuckDB) ──
     01_duplicates.sql        flag repeated txn_ref (window function)
     02_match_reference.sql   join payments → loans on normalised reference, with a name check
@@ -163,10 +160,11 @@ data/
     phone-cases.json         shared test vectors: raw input → normalised (used by pytest AND Vitest)
 
 src/core/                    ── TYPESCRIPT (runtime) ──
-                             config, contract (types + loader), phone, verify, handover-rules,
-                             accounts, retrieval, hours, llm, store, audit, orchestrator
+                             config, contract (types + loader), phone, masking, store,
+                             conversation-store, hours, llm, retrieval, handover-rules,
+                             account, agent, orchestrator, runtime
 src/web/                     index.html, staff.html, chat.ts, staff.ts, styles.css
-netlify/functions/           chat.ts, conversation.ts, handovers.ts, audit.ts
+netlify/functions/           health.ts, chat.ts, conversation.ts, handovers.ts (queue, detail + audit, claim/reply/return)
 tests/                       Vitest: unit + scripted conversations (LLM mocked) + contract checks
 docs/                        this documentation
 ```

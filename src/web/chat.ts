@@ -125,7 +125,10 @@ function updateState(state: string) {
   const withHuman = state === "HANDED_OVER" || state === "WITH_AGENT";
   input.placeholder = withHuman ? "Message the agent…" : state === "CLOSED" ? "This chat has ended" : "Type your question…";
   statusEl.textContent = withHuman ? (state === "WITH_AGENT" ? "Chatting with a Kopano agent" : "Waiting for an agent") : "Kopano Assistant";
-  if (state === "CLOSED") showNewChatButton();
+  if (state === "CLOSED") {
+    forgetConversation(); // a refresh must not bring the closed chat back
+    showNewChatButton();
+  }
   if (withHuman && pollTimer === undefined) pollTimer = window.setInterval(poll, 3000);
   if (!withHuman && pollTimer !== undefined) {
     window.clearInterval(pollTimer);
@@ -165,18 +168,32 @@ form.addEventListener("submit", (event) => {
   void send({ message: text }, text);
 });
 
+function forgetConversation() {
+  conversationId = null;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 async function restore() {
   if (!conversationId) {
     render({ id: "", role: "bot", type: "text", text: "Hi! I'm the Kopano Assistant. I can help with payments, balances, due dates and our policies." });
     return;
   }
   const response = await fetch(`/api/conversation/${conversationId}`).catch(() => null);
-  if (!response?.ok) {
-    conversationId = null;
+  const result = response?.ok ? ((await response.json()) as ChatResponse) : null;
+  // A missing or closed session starts fresh: nothing from the previous chat is shown (shared-phone privacy).
+  if (!result || result.state === "CLOSED") {
+    forgetConversation();
     return restore();
   }
-  const result = (await response.json()) as ChatResponse;
   result.messages.filter((m) => m.type !== "verify_form").forEach(render);
+  // Refreshed while verifying: show the form again so the customer isn't stuck.
+  if (result.state === "VERIFYING") {
+    render({ id: lastMessageId ?? "", role: "bot", type: "verify_form", text: "Enter your registered mobile number and the last 4 digits of your Omang or passport." });
+  }
   updateState(result.state);
 }
 

@@ -1,14 +1,30 @@
 // Rule-based handover triggers from customer-service-standards.docx ("Transfer to a customer
 // service agent"). Rules run BEFORE the LLM so the obvious cases never depend on the model.
 // The LLM can also request a handover; either one is enough (ARCHITECTURE.md §5, routing).
+//
+// Patterns match a REQUEST for a person ("speak to an agent"), not the bare word, so questions
+// like "What are your agent hours?" are answered from policy instead of being handed over.
 
 interface HandoverRule {
   reason: string;
   pattern: RegExp;
 }
 
+const PERSON = "(agent|human|person|manager|consultant|someone|somebody)";
+
 const RULES: HandoverRule[] = [
-  { reason: "Customer asked for a person", pattern: /\b(agent|human|person|manager|someone real|real person|speak to|talk to)\b/i },
+  {
+    reason: "Customer asked for a person",
+    pattern: new RegExp(
+      [
+        `\\b(speak|talk|chat)\\s+(to|with)\\s+(a|an|the)?\\s*(real\\s+)?${PERSON}\\b`, // "speak to an agent"
+        `\\b(i want|i need|get me|connect me (to|with))\\s+(a|an|the)?\\s*(real\\s+)?${PERSON}\\b`, // "I want a person"
+        "\\b(real person|human agent|human being)\\b",
+        "^\\s*(agent|human|person)( please)?[.!]?\\s*$", // just "agent" / "human please"
+      ].join("|"),
+      "i",
+    ),
+  },
   { reason: "Complaint or customer upset", pattern: /\b(complain|complaint|upset|angry|frustrat|ridiculous|terrible|useless|unacceptable)\w*/i },
   {
     reason: "Customer disputes a payment, balance, penalty or charge",

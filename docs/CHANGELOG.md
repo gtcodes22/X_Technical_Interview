@@ -8,6 +8,15 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M9 — Refinements: quick wins — 2026-09-29
+- **Fixed: handover over-triggering.** "What are your agent hours?" handed the chat to a human. The rules now match a *request* for a person ("speak to an agent", "I want a person", "agent please").
+- **Fixed: over-redaction.** Every 4-digit number was stripped before the LLM, e.g. merchant code 5521 and amount 1500. Now 4-digit groups are removed only with ID context (ID/Omang/passport/last 4) or next to a phone number.
+- **Privacy: closed or expired chats return no transcript.** On a shared phone, refreshing the page no longer shows the previous customer's balance. `/api/conversation/:id` closes expired sessions and returns no messages, and the page forgets the conversation.
+- **Fixed:** refreshing mid-verification now shows the verification form again.
+- `/api/health` now reports the data contract's schema version, as-at date and row counts.
+- Docs: ARCHITECTURE status and repository layout match the code. AGENTS "Planned" rows updated. ROADMAP adds M9 and M10.
+- Tests: 37 passing.
+
 ### Added — 2026-09-29 (CI)
 - `.github/workflows/ci.yml` runs on every push and PR to `main`. Three jobs:
   - **typescript:** typecheck, Vitest, build.

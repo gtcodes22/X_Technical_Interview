@@ -2,6 +2,7 @@ import type { Config, Context } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 import buildInfo from "../../src/core/build-info.json";
 import { loadConfig } from "../../src/core/config";
+import { loadContract } from "../../src/core/contract";
 import { storeName } from "../../src/core/store";
 
 // GET /api/health: which version and data are live, and whether storage works.
@@ -18,14 +19,31 @@ export default async (_req: Request, context: Context): Promise<Response> => {
     configError = String(err);
   }
 
-  const healthy = blobs === "ok" && configError === null;
+  // Which data is live: schema version, loan-book date and row counts from data/generated/.
+  let data: Record<string, unknown> = {};
+  let dataError: string | null = null;
+  try {
+    const contract = loadContract();
+    data = {
+      schemaVersion: contract.manifest.schema_version,
+      asAt: contract.manifest.as_at,
+      loans: contract.loans.length,
+      payments: contract.payments.length,
+      kbChunks: contract.chunks.length,
+    };
+  } catch (err) {
+    dataError = String(err);
+  }
+
+  const healthy = blobs === "ok" && configError === null && dataError === null;
   const body = {
     status: healthy ? "ok" : "degraded",
     commit: buildInfo.commit,
     builtAt: buildInfo.builtAt,
     deployContext,
     today,
-    checks: { blobs, config: configError ?? "ok" },
+    data,
+    checks: { blobs, config: configError ?? "ok", data: dataError ?? "ok" },
   };
 
   return Response.json(body, {

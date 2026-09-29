@@ -64,8 +64,8 @@ These come from the assessment brief and Kopano's own policies. Breaking one is 
 | `kopano_data.xlsx` | Loans, Payments, Contact History |
 | `Knowledge_Base/` | 11 policy documents |
 | `docs/` | Project documentation |
-| `scripts/` | _Planned._ Python offline scripts (ingest, allocation, smoke test) |
-| `data/generated/` | _Planned._ JSON contract produced by Python, read by TypeScript. **Regenerate; don't hand-edit** |
-| `src/`, `netlify/functions/` | _Planned._ TypeScript runtime |
+| `scripts/` | Python offline pipeline: `ingest.py`, `kopano/` (cleaning, KB chunking), `sql/` (DuckDB matching + checks), `tests/` |
+| `data/generated/` | JSON contract produced by Python, read by TypeScript. **Regenerate; don't hand-edit** |
+| `src/core/`, `src/web/`, `netlify/functions/` | TypeScript runtime: logic, pages, API endpoints. `tests/` holds the Vitest suite |
 
 After changing anything in `scripts/` or the source data, run the ingest script and commit the regenerated `data/generated/` files in the same commit.

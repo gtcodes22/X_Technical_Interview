@@ -102,3 +102,20 @@ describe("sessions", () => {
     expect(turn.state).toBe("CLOSED");
   });
 });
+
+describe("M9 refinements", () => {
+  it("answers questions that merely mention agents, but hands over real requests for a person", async () => {
+    const { matchHandoverRule } = await import("../src/core/handover-rules");
+    expect(matchHandoverRule("What are your agent hours?")).toBeNull();
+    expect(matchHandoverRule("I want to speak to a person")).not.toBeNull();
+    expect(matchHandoverRule("can I talk to an agent")).not.toBeNull();
+    expect(matchHandoverRule("agent please")).not.toBeNull();
+  });
+
+  it("keeps merchant codes and amounts, but removes ID digits typed with ID context or a phone", async () => {
+    const { redactSensitive } = await import("../src/core/masking");
+    expect(redactSensitive("Is merchant code 5521 right?")).toBe("Is merchant code 5521 right?");
+    expect(redactSensitive("my omang ends 4821")).toBe("my omang ends [digits removed]");
+    expect(redactSensitive("my number 71555204, id 4821")).not.toMatch(/\d/);
+  });
+});
