@@ -8,6 +8,13 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### Added — 2026-09-29 (CI)
+- `.github/workflows/ci.yml` runs on every push and PR to `main`. Three jobs:
+  - **typescript:** typecheck, Vitest, build.
+  - **python:** pytest, re-run the ingest (which stops if any SQL data-quality check fails), then a **drift check** that fails if the committed `data/generated/` differs from a fresh ingest. `manifest.json` is excluded because it holds a timestamp.
+  - **secrets:** a gitleaks scan of the full history.
+- `scripts/ingest.py` now always writes LF line endings. **Why:** output must be byte-identical on Windows and Linux for the drift check.
+
 ### Changed — 2026-09-29 (documentation layout)
 - Root `README.md` trimmed to the essentials, with the live link at the top and a short note that this is a technical assessment.
 - Assessment material moved from `docs/README.md` to `Job_Info/TECHNICAL_INTERVIEW_INFO.md`: brief, requirements, extensions, timeline, goals, inputs and client Q&A.

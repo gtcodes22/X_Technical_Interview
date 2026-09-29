@@ -115,7 +115,8 @@ def records(df: pd.DataFrame) -> list[dict]:
 
 
 def write(name: str, payload: object) -> None:
-    (OUT / name).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    # newline="\n" keeps output byte-identical on Windows and Linux, so CI's drift check is reliable.
+    (OUT / name).write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
 
 
 def sha256(path: Path) -> str:
