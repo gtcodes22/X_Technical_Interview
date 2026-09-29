@@ -8,6 +8,18 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M1 — Data pipeline — 2026-09-29
+- `scripts/ingest.py` + `scripts/kopano/` (cleaning, KB chunking) + `scripts/sql/01–05, 90`. Output: `data/generated/` (150 loans, 32 payments, 43 KB chunks, manifest). Pinned `scripts/requirements.txt`; pytest on the shared phone fixtures, references, amounts and dates (24 tests).
+- **Allocation result:** 17 matched (P48,580.57), 7 needs review, 4 duplicates, 4 unmatched. O SEBEGO → KM-L-0078 is `needs_review`.
+- **Changed:** the name check accepts the surname **or first name + surname initial**. **Why:** the first run flagged obvious owners like "KEITUMETSE M" (Keitumetse Modise) for review. O SEBEGO → Masego Phiri still fails, as intended.
+- **Known limitation:** PDF heading detection is heuristic. Some PDF sections, e.g. late-payment "Credit bureau reporting", are merged into the previous chunk. The text is still retrievable, but the section label is less precise.
+
+### M0 — Scaffold — 2026-09-29
+- Vite pages, TypeScript 7, Vitest, `netlify.toml` (publishes `dist/` only; `ci:build` runs typecheck and tests before building), `/api/health`, context-prefixed Blobs store names, config (`APP_TODAY`, `APP_NOW`), `.gitignore`, `.gitattributes`, `.env.example`.
+- **Why `dist/` only:** connecting the repo without it would have published `kopano_data.xlsx` (customer details) at a public URL.
+- **Why build-info.json:** `COMMIT_REF` exists only at build time, not in functions at runtime, so the build writes it to a file.
+- Added `docs/ROADMAP.md` (milestones M0–M8 with status).
+
 ### Decided — 2026-09-29 (client answer: handover round trip, sessions)
 - **Client (Gaone), question 9:**
   - Agents reply **in the same chat** and **hand back to the bot** when done. The bot is paused meanwhile.

@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-29T09:45:07+00:00",
+  "as_at": "2026-09-30",
+  "today": "2026-10-06",
+  "sources": [
+    {
+      "path": "kopano_data.xlsx",
+      "sha256": "619b602e0af77942d9968fc6b977cb1231159747767b7d47f6b6e8acff142235"
+    },
+    {
+      "path": "Knowledge_Base/about-kopano.txt",
+      "sha256": "2feb82a93c4203fb8eaccb4bd92f15c26dfe9cb58c58b8666a0bed12a1b6540c"
+    },
+    {
+      "path": "Knowledge_Base/complaints.pdf",
+      "sha256": "5f72d2f2b2d6c2fec44e2e31b7641c73d2aaea1a2a74a10428ad35610cc09ac7"
+    },
+    {
+      "path": "Knowledge_Base/customer-service-standards.docx",
+      "sha256": "ec44091b89ffd3095f50974599a59df2cf24b56738cc3f88cf605fd80c59b142"
+    },
+    {
+      "path": "Knowledge_Base/early-settlement.docx",
+      "sha256": "6aff0d6d320f35d791f1a8be51d70971cf52c48661844654bed27e572579feda"
+    },
+    {
+      "path": "Knowledge_Base/faqs.txt",
+      "sha256": "6f35eb66a7040e2877c24befbb6387da436904daf77dfa995c645fcb85a6e825"
+    },
+    {
+      "path": "Knowledge_Base/how-to-pay.txt",
+      "sha256": "d0edae6fbae25864eb47b0c6c68ab8b7749975887544e82cafcd251b2ca75ce6"
+    },
+    {
+      "path": "Knowledge_Base/late-payment-policy.pdf",
+      "sha256": "e41474b3538c4c5e04d135d21882dc7a3c063b6488ad8ef7ce121d32b06a2c42"
+    },
+    {
+      "path": "Knowledge_Base/loan-products.docx",
+      "sha256": "013b439e882b3415a549b238a93f76530fff9d01d42440be34a204b53ffc3b31"
+    },
+    {
+      "path": "Knowledge_Base/payment-holidays-and-restructuring.pdf",
+      "sha256": "aad4b585e6ae0adb5ca34409af6fd42b1ae59aad32274a033c7d4413670110a3"
+    },
+    {
+      "path": "Knowledge_Base/penalties.docx",
+      "sha256": "d028d97085e1db8a93c6090558504dfda631d82f173a911d6452330fa649e9d2"
+    },
+    {
+      "path": "Knowledge_Base/privacy-and-verification.pdf",
+      "sha256": "97dd79adf9d5a46beb478facaf23f5acf8f6cfaf2b528176342ef8d0e7243d3a"
+    }
+  ],
+  "counts": {
+    "loans": 150,
+    "payments": 32,
+    "kb_chunks": 43,
+    "allocations_by_status": {
+      "duplicate": {
+        "payments": 4,
+        "amount_thebe": 975375
+      },
+      "matched": {
+        "payments": 17,
+        "amount_thebe": 4858057
+      },
+      "needs_review": {
+        "payments": 7,
+        "amount_thebe": 1285839
+      },
+      "unmatched": {
+        "payments": 4,
+        "amount_thebe": 992232
+      }
+    }
+  }
+}

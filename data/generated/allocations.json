@@ -1,0 +1,226 @@
+[
+  {
+    "row_id": 1,
+    "loan_id": "KM-L-0069",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 2,
+    "loan_id": "KM-L-0065",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 3,
+    "loan_id": "KM-L-0144",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 4,
+    "loan_id": "KM-L-0061",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 5,
+    "loan_id": null,
+    "status": "unmatched",
+    "method": "none",
+    "reason": "no usable reference or phone match"
+  },
+  {
+    "row_id": 6,
+    "loan_id": "KM-L-0141",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 7,
+    "loan_id": null,
+    "status": "duplicate",
+    "method": "none",
+    "reason": "repeat of MZ57846384 (first seen as row 6)"
+  },
+  {
+    "row_id": 8,
+    "loan_id": "KM-L-0078",
+    "status": "needs_review",
+    "method": "reference",
+    "reason": "reference KM-L-0078 belongs to Masego Phiri but payer is O SEBEGO"
+  },
+  {
+    "row_id": 9,
+    "loan_id": "KM-L-0138",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0138"
+  },
+  {
+    "row_id": 10,
+    "loan_id": null,
+    "status": "duplicate",
+    "method": "none",
+    "reason": "repeat of OM19212958 (first seen as row 9)"
+  },
+  {
+    "row_id": 11,
+    "loan_id": "KM-L-0106",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 12,
+    "loan_id": "KM-L-0016",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 13,
+    "loan_id": "KM-L-0082",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 14,
+    "loan_id": "KM-L-0076",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 15,
+    "loan_id": "KM-L-0111",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0111"
+  },
+  {
+    "row_id": 16,
+    "loan_id": "KM-L-0041",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 17,
+    "loan_id": "KM-L-0024",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 18,
+    "loan_id": "KM-L-0040",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 19,
+    "loan_id": "KM-L-0044",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 20,
+    "loan_id": "KM-L-0062",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 21,
+    "loan_id": "KM-L-0102",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0102"
+  },
+  {
+    "row_id": 22,
+    "loan_id": null,
+    "status": "unmatched",
+    "method": "none",
+    "reason": "no usable reference or phone match"
+  },
+  {
+    "row_id": 23,
+    "loan_id": "KM-L-0094",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 24,
+    "loan_id": null,
+    "status": "duplicate",
+    "method": "none",
+    "reason": "repeat of MZ85449835 (first seen as row 23)"
+  },
+  {
+    "row_id": 25,
+    "loan_id": "KM-L-0089",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0089"
+  },
+  {
+    "row_id": 26,
+    "loan_id": "KM-L-0008",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0008"
+  },
+  {
+    "row_id": 27,
+    "loan_id": null,
+    "status": "unmatched",
+    "method": "none",
+    "reason": "no usable reference or phone match"
+  },
+  {
+    "row_id": 28,
+    "loan_id": "KM-L-0095",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  },
+  {
+    "row_id": 29,
+    "loan_id": null,
+    "status": "unmatched",
+    "method": "none",
+    "reason": "no usable reference or phone match"
+  },
+  {
+    "row_id": 30,
+    "loan_id": null,
+    "status": "duplicate",
+    "method": "none",
+    "reason": "repeat of OM70019622 (first seen as row 29)"
+  },
+  {
+    "row_id": 31,
+    "loan_id": "KM-L-0019",
+    "status": "needs_review",
+    "method": "phone",
+    "reason": "no reference; payer phone matches KM-L-0019"
+  },
+  {
+    "row_id": 32,
+    "loan_id": "KM-L-0148",
+    "status": "matched",
+    "method": "reference",
+    "reason": "reference and payer name match"
+  }
+]
