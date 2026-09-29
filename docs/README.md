@@ -4,7 +4,7 @@ An AI chat assistant for **Kopano Microfinance**'s website. It answers routine b
 
 Built as the technical assessment for the **Junior Developer — Operations** role at Xavier Africa.
 
-> **Status:** Discovery and planning. No application code yet. See [CHANGELOG.md](CHANGELOG.md) for what has changed and [ARCHITECTURE.md](ARCHITECTURE.md) for the proposed design.
+> **Status:** Built and deployed (M0–M8). The project README at the [repository root](../README.md) covers running, deploying, design decisions, known limitations and next steps. See [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md) for progress.
 
 ---
 
@@ -197,14 +197,6 @@ Record the answers here as they are given.
 | 8 | What counts as success for Kopano after launch (fewer calls, fewer complaints, fewer wrong chases)? | _pending_ |
 | 9 | After a chat is handed over, how does the agent get back to the customer: call, SMS, or reply in the chat? What should happen for customers who haven't verified yet? | **Answered 2026-09-29.**<br>• **Approach:** up to us.<br>• **Preferred:** the agent replies **in the same chat** and, when done, **hands back to the bot**, which continues. The bot is paused while the agent is in control.<br>• **Sessions:** 60 minutes maximum, or close after 5 minutes idle.<br>• **Unverified customers:** hand over straight away; collecting details is optional.<br>• **Our interpretation, confirmed:** timers pause during handover, verification lasts the whole session, and out-of-hours handovers stay queued. See ARCHITECTURE D10 and D11 |
 
-## 9. Running and deploying
+## 9. Running, deploying, limitations and next steps
 
-_To be written once the stack is chosen and the app exists. This section must end up covering: prerequisites, environment variables (including the LLM API key), loading the data and knowledge base, running locally, running tests, and deploying._
-
-## 10. Known limitations
-
-_To be filled in as the build progresses._
-
-## 11. What we would do next
-
-_To be filled in at the end of the build. Candidates live in [IDEAS.md](IDEAS.md)._
+See the [root README](../README.md).

@@ -12,7 +12,7 @@ The build is split into milestones. **Each milestone ends with at least one comm
 | M5 | Verification + account answers | Verify form (never sent to the LLM), masking, 3-strike handover, account card with matched payments, multi-loan borrowers | ✅ Done |
 | M6 | Handover + sessions | Rule + LLM handover triggers, queue entry, agent-hours notice, bot silence, 60 min / 5 min idle sessions paused during handover, payment candidates on "I already paid" | ✅ Done |
 | M7 | Staff page + Agent view | Token gate, queue, detail view, claim / reply / return, polling, audit tab | ✅ Done |
-| M8 | Hardening + handoff | Health complete, structured logs, smoke test, final README (run, deploy, limitations, next steps), lock auto-publishing | ⏳ Next |
+| M8 | Hardening + handoff | Health complete, structured logs, smoke test, final README (run, deploy, limitations, next steps), lock auto-publishing | ✅ Done |
 
 **Stretch, in priority order:** degraded-mode kill switch · per-IP verification rate limit · GitHub Actions CI · settlement quote (Combined answers) · Docker ingest image.
 

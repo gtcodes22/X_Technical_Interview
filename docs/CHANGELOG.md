@@ -8,6 +8,12 @@ Dates are real calendar dates. The assessment's simulated "today" (6 Oct 2026) i
 
 ## [Unreleased]
 
+### M8 — Handoff — 2026-09-29
+- Root `README.md`: what it does (core + four extensions), run locally, regenerate data, deploy to Netlify, design decisions, known limitations, next steps.
+- `docs/README.md` status and §9 now point to the root README. ROADMAP: all milestones done.
+- **Operational reminder:** Netlify visitor access (login wall) must be switched off before the walkthrough.
+- **Not done (listed in limitations):** smoke-test script, per-IP rate limiting, token-budget enforcement, degraded mode, CI workflow, `kb.py` readability pass.
+
 ### M7 — Staff page + Agent view — 2026-09-29
 - `src/core/agent.ts`: `claim` (refused with 409 if another agent holds the chat), `reply` (claiming agent only), `returnToAssistant` (state back to `VERIFIED`/`ANONYMOUS`, session timers restart, internal note to audit only).
 - `netlify/functions/handovers.ts`: staff API behind `x-staff-token` — queue, detail (transcript, loans with masked phone and **no ID digits**, payment candidates, audit), claim/reply/return.
