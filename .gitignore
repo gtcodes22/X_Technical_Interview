@@ -1,0 +1,22 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Node / Vite / Netlify
+node_modules/
+dist/
+.netlify/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Local DuckDB build output (data/generated/ IS committed — it's the contract)
+data/build/
+
+# OS / editor
+.DS_Store
+Thumbs.db

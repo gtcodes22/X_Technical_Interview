@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kopano Assistant</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="chat">
+      <header class="chat-header">
+        <h1>Kopano Assistant</h1>
+        <p id="status" class="muted">Connecting…</p>
+      </header>
+      <section id="messages" class="messages" aria-live="polite"></section>
+      <form id="composer" class="composer">
+        <label for="input" class="sr-only">Your message</label>
+        <input id="input" autocomplete="off" placeholder="Type your question…" />
+        <button type="submit">Send</button>
+      </form>
+      <p class="footer muted">Kopano will never ask for your PIN or password.</p>
+    </main>
+    <script type="module" src="./chat.ts"></script>
+  </body>
+</html>

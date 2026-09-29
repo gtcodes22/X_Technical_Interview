@@ -1,0 +1,30 @@
+{
+  "name": "kopano-assistant",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AI customer assistant for Kopano Microfinance (Xavier Africa technical assessment)",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "dev:web": "vite",
+    "build": "vite build",
+    "build:info": "node scripts/write-build-info.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "ci:build": "npm run build:info && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.0",
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.1"
+  }
+}

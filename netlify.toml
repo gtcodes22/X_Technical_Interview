@@ -1,0 +1,29 @@
+# Netlify configuration. See docs/OPERATIONS.md §1.
+
+[build]
+  # Tests and typecheck gate every deploy: a failing test fails the build, so nothing is published.
+  command = "npm run ci:build"
+  # ONLY the built pages are public. Never publish the repo root (it holds the data extract).
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[dev]
+  # `netlify dev` runs Vite for the pages and emulates Functions + Blobs locally.
+  framework = "#custom"
+  command = "npm run dev:web"
+  targetPort = 5173
+  port = 8888
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
